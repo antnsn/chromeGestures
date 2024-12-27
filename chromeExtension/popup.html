@@ -10,54 +10,97 @@
     /* Custom Styles */
     body {
       background-color: #eef1f6;
-      padding: 20px;
-      width: 500px;
       color: #333;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh; /* Full height of the viewport */
+      overflow: hidden; /* Prevent scrolling */
+    }
+
+    .container {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      padding: 30px;
+      width: 350px; /* Fixed size for consistency */
+      max-width: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .icon {
+      width: 90px;  /* Adjusted for proper visual balance */
+      height: 90px;
+      margin-bottom: 20px;
+      fill: #1a73e8;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    p, ul {
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 15px;
+    }
+
+    ul {
+      margin-top: 10px;
+      padding-left: 20px;
     }
 
     footer {
       text-align: center;
       font-size: 14px;
-      margin-top: 30px;
+      margin-top: 20px;
     }
 
     footer a {
+      display: inline-block;
+      background-color: #1a73e8;
       color: #fff;
       font-weight: 600;
+      padding: 10px 20px;
+      border-radius: 5px;
+      text-decoration: none;
     }
 
     footer a:hover {
-      text-decoration: underline;
+      background-color: #1558b0;
+      text-decoration: none;
     }
 
-    .icon {
-      width: 64px;  /* Increased size */
-      height: 64px;
-      margin-bottom: 20px; /* Added margin for spacing */
-      fill: #1a73e8; /* Icon color */
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
+    footer a:focus {
+      outline: 2px solid #1558b0;
+    }
+
+    /* Adjust button size for small popups */
+    .button:hover {
+      background-color: #1558b0;
     }
   </style>
 </head>
 <body>
 
-  <div class="container my-5 p-4 bg-white rounded shadow-sm">
-    <!-- Centered and enlarged SVG Icon -->
+  <div class="container">
     <img src="icon.svg" alt="chromeGestures Icon" class="icon">
 
-
-    <p class="lead">Thank you for using chromeGestures! This extension allows you to navigate through tabs using simple mouse gestures:</p>
+    <p class="lead">chromeGestures allows you to navigate through tabs using simple mouse gestures:</p>
     <ul class="list">
+      <li><strong>Activation key:</strong> Right mousebutton.</li>
       <li><strong>Right Gesture (R):</strong> Go forward in history.</li>
       <li><strong>Left Gesture (L):</strong> Go back in history.</li>
       <li><strong>Diagonal Right Gesture (DR):</strong> Close the current tab.</li>
     </ul>
 
+
     <footer>
-      <p>For more details and to contribute, visit our GitHub repository:</p>
       <a href="https://github.com/antnsn/chromeGestures" target="_blank" class="button primary">
         View on GitHub
       </a>

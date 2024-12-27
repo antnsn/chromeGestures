@@ -3,7 +3,7 @@
 chromeGestures is a Chrome extension that allows you to navigate through tabs using simple mouse gestures with visual path drawing.
 
 ## Features
-
+- **Activation key**: Right mousebutton
 - **Go Back in History**: Perform a left gesture (L) to navigate back in history.
 - **Go Forward in History**: Perform a right gesture (R) to navigate forward in history.
 - **Close Current Tab**: Perform a diagonal right gesture (DR) to close the current tab.
