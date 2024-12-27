@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mouse Gestures Extension</title>
+  <!-- Link to Chota CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chota@latest/dist/chota.min.css">
+  <style>
+    /* Custom Styles */
+    body {
+      background-color: #eef1f6;
+      padding: 20px;
+      width: 500px;
+      color: #333;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 14px;
+      margin-top: 30px;
+    }
+
+    footer a {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    .icon {
+      width: 64px;  /* Increased size */
+      height: 64px;
+      margin-bottom: 20px; /* Added margin for spacing */
+      fill: #1a73e8; /* Icon color */
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container my-5 p-4 bg-white rounded shadow-sm">
+    <!-- Centered and enlarged SVG Icon -->
+    <img src="icon.svg" alt="chromeGestures Icon" class="icon">
+
+
+    <p class="lead">Thank you for using chromeGestures! This extension allows you to navigate through tabs using simple mouse gestures:</p>
+    <ul class="list">
+      <li><strong>Right Gesture (R):</strong> Go forward in history.</li>
+      <li><strong>Left Gesture (L):</strong> Go back in history.</li>
+      <li><strong>Diagonal Right Gesture (DR):</strong> Close the current tab.</li>
+    </ul>
+
+    <footer>
+      <p>For more details and to contribute, visit our GitHub repository:</p>
+      <a href="https://github.com/antnsn/chromeGestures" target="_blank" class="button primary">
+        View on GitHub
+      </a>
+    </footer>
+  </div>
+
+</body>
+</html>
