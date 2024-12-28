@@ -148,21 +148,29 @@ class MouseGestureRecognizer {
             hasGesture: MouseGestureRecognizer.GESTURES.hasOwnProperty(this.path)
         });
         
-        if (this.settings.activationButton === 2 && this.isDrawing) {
+        // Always prevent context menu if we just finished a gesture
+        if (this.path !== '') {
             e.preventDefault();
-            if (this.path !== '') {
-                console.log('[Debug] Executing gesture from context menu:', this.path);
-                const gesture = MouseGestureRecognizer.GESTURES[this.path];
-                if (gesture) {
-                    try {
-                        gesture();
-                    } catch (error) {
-                        console.error('Error executing gesture:', error);
+            if (this.settings.activationButton === 2 && this.isDrawing) {
+                if (MouseGestureRecognizer.GESTURES.hasOwnProperty(this.path)) {
+                    console.log('[Debug] Executing gesture from context menu:', this.path);
+                    const gesture = MouseGestureRecognizer.GESTURES[this.path];
+                    if (gesture) {
+                        try {
+                            gesture();
+                        } catch (error) {
+                            console.error('Error executing gesture:', error);
+                        }
                     }
                 }
             }
+            this.cleanup();
+            // Add a small delay before allowing the next context menu
+            setTimeout(() => {
+                this.path = '';
+            }, 100);
+            return;
         }
-        this.cleanup();
     }
 
     handleResize() {
@@ -378,21 +386,39 @@ class MouseGestureRecognizer {
             if (MouseGestureRecognizer.GESTURES.hasOwnProperty(this.path)) {
                 console.log('[Debug] Gesture aborted: continued drawing after valid gesture');
                 this.path = 'ABORTED';
-                // Change the line color to indicate abortion
-                this.pathPoints = this.pathPoints.slice(-10); // Keep only recent points
+                this.pathPoints = this.pathPoints.slice(-10);
                 return;
             }
 
-            // If we already have a direction and it's different, check for combined gestures
+            // Prevent oscillating movements (U->D, D->U)
+            if ((direction === 'U' && this.lastGesture === 'D') || 
+                (direction === 'D' && this.lastGesture === 'U')) {
+                console.log('[Debug] Gesture aborted: oscillating up/down movement');
+                this.path = 'ABORTED';
+                this.pathPoints = this.pathPoints.slice(-10);
+                return;
+            }
+
+            // If we already have a direction and it's different, check for valid combined gestures
             if (this.path && this.path !== direction) {
                 const combinedGesture = this.path + direction;
-                // Only update if it's a valid gesture
-                if (MouseGestureRecognizer.GESTURES.hasOwnProperty(combinedGesture)) {
+                // Only allow specific combinations (DR, UR)
+                if (combinedGesture === 'DR' || combinedGesture === 'UR') {
                     this.path = combinedGesture;
                     console.log('[Debug] Combined gesture detected:', this.path);
+                } else {
+                    console.log('[Debug] Invalid combination, aborting');
+                    this.path = 'ABORTED';
+                    this.pathPoints = this.pathPoints.slice(-10);
                 }
-            } else {
+            } else if (!this.path || this.path === direction) {
+                // Only set the path if it's empty or the same direction
                 this.path = direction;
+            } else {
+                // Any other case should abort
+                console.log('[Debug] Invalid movement pattern, aborting');
+                this.path = 'ABORTED';
+                this.pathPoints = this.pathPoints.slice(-10);
             }
             this.lastGesture = direction;
         }
