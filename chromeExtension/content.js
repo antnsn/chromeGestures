@@ -80,6 +80,10 @@ class MouseGestureRecognizer {
                            Math.pow(currentPoint.y - lastPoint.y, 2);
             if (distance > (1 << ((7 - this.settings.sensitivity) << 1))) {
                 this.pathPoints.push(currentPoint);
+                // Limit the number of points to create trailing effect
+                if (this.pathPoints.length > 20) {
+                    this.pathPoints.shift();
+                }
                 this.processGesture(lastPoint, currentPoint);
                 
                 if (this.animationFrameId) {
@@ -120,7 +124,7 @@ class MouseGestureRecognizer {
         
         if (this.isDrawing) {
             e.preventDefault(); // Prevent default when we're drawing
-            if (this.path !== '') {
+            if (this.path !== '' && this.path !== 'ABORTED') {
                 console.log('[Debug] Executing gesture:', this.path);
                 const gesture = MouseGestureRecognizer.GESTURES[this.path];
                 if (gesture) {
@@ -130,6 +134,8 @@ class MouseGestureRecognizer {
                         console.error('Error executing gesture:', error);
                     }
                 }
+            } else if (this.path === 'ABORTED') {
+                console.log('[Debug] Gesture was aborted, not executing');
             }
             this.cleanup();
         }
@@ -242,6 +248,8 @@ class MouseGestureRecognizer {
     setupCanvas() {
         this.ctx.lineCap = 'round';
         this.ctx.lineJoin = 'round';
+        this.ctx.shadowBlur = 2;
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
         this.handleResize();
     }
 
@@ -277,15 +285,66 @@ class MouseGestureRecognizer {
         if (this.pathPoints.length < 2) return;
         
         this.clearCanvas();
-        this.ctx.beginPath();
-        this.ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
-        this.ctx.lineWidth = 3;
         
-        this.ctx.moveTo(this.pathPoints[0].x, this.pathPoints[0].y);
-        for (let i = 1; i < this.pathPoints.length; i++) {
-            this.ctx.lineTo(this.pathPoints[i].x, this.pathPoints[i].y);
+        // Create gradient based on path direction
+        const startPoint = this.pathPoints[0];
+        const endPoint = this.pathPoints[this.pathPoints.length - 1];
+        const gradient = this.ctx.createLinearGradient(
+            startPoint.x, startPoint.y,
+            endPoint.x, endPoint.y
+        );
+        
+        // Set gradient colors based on gesture
+        if (this.path === 'ABORTED') {
+            gradient.addColorStop(0, 'rgba(189, 195, 199, 0.4)'); // Gray when aborted
+            gradient.addColorStop(1, 'rgba(127, 140, 141, 0.8)');
+        } else if (this.path.includes('U')) {
+            gradient.addColorStop(0, 'rgba(52, 152, 219, 0.4)');
+            gradient.addColorStop(1, 'rgba(41, 128, 185, 0.8)');
+        } else if (this.path.includes('D')) {
+            gradient.addColorStop(0, 'rgba(231, 76, 60, 0.4)');
+            gradient.addColorStop(1, 'rgba(192, 57, 43, 0.8)');
+        } else if (this.path === 'R') {
+            gradient.addColorStop(0, 'rgba(46, 204, 113, 0.4)');
+            gradient.addColorStop(1, 'rgba(39, 174, 96, 0.8)');
+        } else if (this.path === 'L') {
+            gradient.addColorStop(0, 'rgba(155, 89, 182, 0.4)');
+            gradient.addColorStop(1, 'rgba(142, 68, 173, 0.8)');
+        } else {
+            gradient.addColorStop(0, 'rgba(52, 152, 219, 0.4)');
+            gradient.addColorStop(1, 'rgba(41, 128, 185, 0.8)');
         }
-        this.ctx.stroke();
+
+        // Draw the main path with gradient and varying width
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = gradient;
+        
+        // Use quadratic curves for smoother path
+        this.ctx.moveTo(this.pathPoints[0].x, this.pathPoints[0].y);
+        for (let i = 1; i < this.pathPoints.length - 1; i++) {
+            const progress = i / (this.pathPoints.length - 1);
+            this.ctx.lineWidth = 2 + (progress * 4); // Line gets thicker towards the end
+            
+            const xc = (this.pathPoints[i].x + this.pathPoints[i + 1].x) / 2;
+            const yc = (this.pathPoints[i].y + this.pathPoints[i + 1].y) / 2;
+            this.ctx.quadraticCurveTo(
+                this.pathPoints[i].x,
+                this.pathPoints[i].y,
+                xc,
+                yc
+            );
+            this.ctx.stroke();
+            this.ctx.beginPath();
+            this.ctx.moveTo(xc, yc);
+        }
+        
+        // For the last point
+        if (this.pathPoints.length > 1) {
+            const last = this.pathPoints[this.pathPoints.length - 1];
+            this.ctx.lineWidth = 6; // Thickest at the end
+            this.ctx.lineTo(last.x, last.y);
+            this.ctx.stroke();
+        }
     }
 
     processGesture(startPoint, endPoint) {
@@ -293,10 +352,6 @@ class MouseGestureRecognizer {
         const dy = endPoint.y - startPoint.y;
         const slope = Math.abs(dy / dx);
         let direction = '';
-
-        // More lenient diagonal threshold (approximately 30-60 degrees)
-        const diagonalMin = Math.tan(Math.PI / 6); // 30 degrees
-        const diagonalMax = Math.tan(Math.PI / 3); // 60 degrees
 
         // Minimum movement threshold to avoid tiny movements
         const minMovement = 10;
@@ -318,6 +373,15 @@ class MouseGestureRecognizer {
                 lastGesture: this.lastGesture,
                 currentPath: this.path
             });
+
+            // If we have a valid gesture and continue drawing, abort it
+            if (MouseGestureRecognizer.GESTURES.hasOwnProperty(this.path)) {
+                console.log('[Debug] Gesture aborted: continued drawing after valid gesture');
+                this.path = 'ABORTED';
+                // Change the line color to indicate abortion
+                this.pathPoints = this.pathPoints.slice(-10); // Keep only recent points
+                return;
+            }
 
             // If we already have a direction and it's different, check for combined gestures
             if (this.path && this.path !== direction) {
