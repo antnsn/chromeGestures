@@ -1,57 +1,86 @@
-# chromeGestures
+<p align="center">
+  <img width="30%" src="chromeExtension/icon.svg">
+</p>
 
-chromeGestures is a Chrome extension that allows you to navigate through tabs using simple mouse gestures with visual path drawing.
+
+# Chrome Gestures with Path Drawing
+
+A Chrome extension that enables mouse gesture navigation with visual feedback. Draw gestures with your mouse to perform common browser actions like navigating back/forward, closing tabs, and reopening closed tabs.
 
 ## Features
-- **Activation key**: Right mousebutton
-- **Go Back in History**: Perform a left gesture (L) to navigate back in history.
-- **Go Forward in History**: Perform a right gesture (R) to navigate forward in history.
-- **Close Current Tab**: Perform a diagonal right gesture (DR) to close the current tab.
 
-## Installation
+### Mouse Gestures
+- **Back**: Draw Left (L)
+- **Forward**: Draw Right (R)
+- **Close Tab**: Draw Down-Right (DR)
+- **Reopen Closed Tab**: Draw Up-Right (UR)
 
-1. Clone the repository:
-    ```sh
-    git clone https://github.com/antnsn/chromeGestures.git
-    ```
-2. Open Chrome and navigate to `chrome://extensions/`.
-3. Enable "Developer mode" by toggling the switch in the top right corner.
-4. Click on "Load unpacked" and select the `chromeExtension` directory from the cloned repository.
+### Visual Feedback
+- Real-time gesture path visualization
+- Color-coded gestures:
+  - Up movements: Blue gradient
+  - Down movements: Red gradient
+  - Right movement: Green gradient
+  - Left movement: Purple gradient
+- Dynamic line width that grows towards cursor
+- Smooth trailing effect
+- Visual abort feedback (turns gray)
+
+### Customization
+- Configurable activation buttons:
+  - Middle Mouse Button (Button 1)
+  - Right Mouse Button (Button 2)
+  - Mouse Button 4
+  - Mouse Button 5
+
+### Smart Features
+- Gesture abort: Continue drawing after a valid gesture to cancel it
+- Automatic gesture recognition
+- Smooth gesture trails with limited length
+- Settings persistence across browser sessions
 
 ## Usage
 
-1. Right-click and hold to start tracking a gesture.
-2. Move the mouse in the desired direction to perform a gesture.
-3. Release the right mouse button to execute the corresponding action.
+1. Hold down your chosen activation button (default: Right Mouse Button)
+2. Draw one of the supported gestures
+3. Release the button to execute the gesture
 
-## Development
+To abort a gesture:
+1. Start drawing a gesture
+2. If you want to cancel, just keep drawing
+3. The path will turn gray to indicate abortion
+4. Release to cancel without executing any action
 
-To contribute to the project, follow these steps:
+## Installation
 
-1. Fork the repository.
-2. Create a new branch:
-    ```sh
-    git checkout -b feature/your-feature-name
-    ```
-3. Make your changes and commit them:
-    ```sh
-    git commit -m 'Add some feature'
-    ```
-4. Push to the branch:
-    ```sh
-    git push origin feature/your-feature-name
-    ```
-5. Open a pull request.
+1. Clone this repository
+2. Open Chrome and navigate to `chrome://extensions/`
+3. Enable "Developer mode"
+4. Click "Load unpacked" and select the extension directory
+
+## Permissions Required
+- `tabs`: For tab management
+- `activeTab`: For current tab access
+- `scripting`: For content script injection
+- `sessions`: For reopening closed tabs
+- `storage`: For settings persistence
+
+## Technical Details
+
+- Uses Canvas API for smooth gesture drawing
+- Implements gradient-based visual feedback
+- Features dynamic line width and opacity
+- Employs quadratic curves for smooth path rendering
+- Includes debug logging for troubleshooting
+
+## Contributing
+
+Feel free to submit issues and enhancement requests!
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+[MIT License](LICENSE)
 
-## Acknowledgements
+## Credits
 
-- [Chota CSS](https://github.com/jenil/chota) for the lightweight CSS framework used in the popup.
-
-## Contact
-
-For more details and to contribute, visit our GitHub repository:
-[chromeGestures on GitHub](https://github.com/antnsn/chromeGestures)
+Created by [antnsn](https://github.com/antnsn)
