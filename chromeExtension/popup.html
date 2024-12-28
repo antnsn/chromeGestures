@@ -4,108 +4,149 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mouse Gestures Extension</title>
-  <!-- Link to Chota CSS -->
+  <!-- Preload critical assets -->
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/chota@latest/dist/chota.min.css" as="style">
+  <link rel="preload" href="icon.svg" as="image">
+  
+  <!-- Optimized CSS loading -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chota@latest/dist/chota.min.css">
   <style>
-    /* Custom Styles */
+    /* Optimized CSS with better performance */
+    :root {
+      --primary-color: #1a73e8;
+      --hover-color: #1558b0;
+    }
+
     body {
       background-color: #eef1f6;
       color: #333;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding: 0;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
       margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh; /* Full height of the viewport */
-      overflow: hidden; /* Prevent scrolling */
+      min-width: 450px;
+      min-height: 500px;
+      padding: 1rem;
+      box-sizing: border-box;
     }
 
     .container {
       background-color: white;
       border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      padding: 30px;
-      width: 350px; /* Fixed size for consistency */
-      max-width: 100%;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      display: grid;
+      gap: 1rem;
+      width: 100%;
       box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
     }
 
     .icon {
-      width: 90px;  /* Adjusted for proper visual balance */
+      width: 90px;
       height: 90px;
-      margin-bottom: 20px;
-      fill: #1a73e8;
+      margin: 0 auto 1rem;
       display: block;
-      margin-left: auto;
-      margin-right: auto;
     }
 
-    p, ul {
-      font-size: 14px;
+    .lead {
+      font-size: 0.95rem;
       line-height: 1.5;
-      margin-bottom: 15px;
+      margin: 0 0 0.5rem;
     }
 
-    ul {
-      margin-top: 10px;
-      padding-left: 20px;
+    .list {
+      margin: 0;
+      padding-left: 1.2rem;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .list li {
+      margin-bottom: 0.5rem;
+    }
+
+    .button {
+      display: inline-block;
+      background-color: var(--primary-color);
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: 500;
+      text-align: center;
+      transition: background-color 0.2s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .button:hover {
+      background-color: var(--hover-color);
     }
 
     footer {
       text-align: center;
-      font-size: 14px;
-      margin-top: 20px;
+      margin-top: auto;
     }
 
-    footer a {
-      display: inline-block;
-      background-color: #1a73e8;
-      color: #fff;
-      font-weight: 600;
-      padding: 10px 20px;
-      border-radius: 5px;
-      text-decoration: none;
+    .settings {
+      border-top: 1px solid #eee;
+      padding-top: 1rem;
+      margin-top: 1rem;
     }
 
-    footer a:hover {
-      background-color: #1558b0;
-      text-decoration: none;
+    .settings-group {
+      margin-bottom: 1rem;
     }
 
-    footer a:focus {
-      outline: 2px solid #1558b0;
+    .settings-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
     }
 
-    /* Adjust button size for small popups */
-    .button:hover {
-      background-color: #1558b0;
+    select {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background-color: white;
+      font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
-
   <div class="container">
-    <img src="icon.svg" alt="chromeGestures Icon" class="icon">
+    <img src="icon.svg" alt="Mouse Gestures" class="icon" width="90" height="90">
 
-    <p class="lead">chromeGestures allows you to navigate through tabs using simple mouse gestures:</p>
+    <p class="lead">Navigate with simple mouse gestures:</p>
     <ul class="list">
-      <li><strong>Activation key:</strong> Right mousebutton.</li>
-      <li><strong>Right Gesture (R):</strong> Go forward in history.</li>
-      <li><strong>Left Gesture (L):</strong> Go back in history.</li>
-      <li><strong>Diagonal Right Gesture (DR):</strong> Close the current tab.</li>
+      <li><strong>Go Forward:</strong> Draw right (R)</li>
+      <li><strong>Go Back:</strong> Draw left (L)</li>
+      <li><strong>Close Tab:</strong> Draw down-right (DR)</li>
+      <li><strong>Reopen Tab:</strong> Draw up-right (UR)</li>
     </ul>
 
+    <div class="settings">
+      <div class="settings-group">
+        <label for="activationKey">Activation Key:</label>
+        <select id="activationKey">
+          <option value="1">Middle Mouse Button</option>
+          <option value="2" selected>Right Mouse Button</option>
+          <option value="3">Mouse Button 4</option>
+          <option value="4">Mouse Button 5</option>
+        </select>
+      </div>
+    </div>
 
     <footer>
-      <a href="https://github.com/antnsn/chromeGestures" target="_blank" class="button primary">
+      <a href="https://github.com/antnsn/chromeGestures" 
+         target="_blank" 
+         rel="noopener noreferrer" 
+         class="button">
         View on GitHub
       </a>
     </footer>
   </div>
 
+  <!-- Load external script file -->
+  <script src="popup.js"></script>
 </body>
 </html>
