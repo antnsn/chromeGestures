@@ -3,7 +3,7 @@
     "name": "Mouse Gestures with Path Drawing",
     "description": "A Chrome extension that allows mouse gestures with visual path drawing.",
     "version": "1.0",
-    "permissions": ["tabs", "scripting", "sessions", "storage"],
+    "permissions": ["sessions", "storage"],
     "host_permissions": ["<all_urls>"],
     "background": {
       "service_worker": "background.js"

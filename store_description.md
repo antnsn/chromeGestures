@@ -19,11 +19,8 @@ Key Features:
 • Automatic settings persistence
 
 Required Permissions Explained:
-• tabs: Required for closing tabs and managing tab navigation
-• scripting: Used to draw the gesture visualization on web pages
 • sessions: Enables the "reopen closed tab" feature
 • storage: Saves your gesture settings between browser sessions
-• host permission (<all_urls>): Required to draw gesture trails on any webpage you visit. The extension only uses this to show the visual feedback and doesn't read or modify any website content.
 
 Privacy & Data Usage:
 • Mouse movement is only tracked while drawing gestures
