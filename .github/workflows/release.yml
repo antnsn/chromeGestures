@@ -1,0 +1,25 @@
+name: Release Chrome Extension
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Zip Chrome Extension
+      run: |
+        zip -r chromeGestures.zip chromeExtension/
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: chromeGestures.zip
+        asset_name: chromeGestures.zip
+        asset_content_type: application/zip

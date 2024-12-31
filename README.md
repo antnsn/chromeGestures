@@ -59,9 +59,6 @@ To abort a gesture:
 4. Click "Load unpacked" and select the extension directory
 
 ## Permissions Required
-- `tabs`: For tab management
-- `activeTab`: For current tab access
-- `scripting`: For content script injection
 - `sessions`: For reopening closed tabs
 - `storage`: For settings persistence
 
