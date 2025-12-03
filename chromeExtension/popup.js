@@ -5,6 +5,13 @@ function debugLog(message, data) {
 }
 
 // Load and save settings
+
+function updateRightClickWarning() {
+  const select = document.getElementById("activationKey");
+  const warning = document.getElementById("rightClickWarning");
+  if (!select || !warning) return;
+  warning.style.display = select.value === "2" ? "block" : "none";
+}
 async function loadSettings() {
   try {
     debugLog("Loading settings from storage");
@@ -14,7 +21,7 @@ async function loadSettings() {
     // If no settings exist, create and save default settings
     if (!result.gestureSettings) {
       const defaultSettings = {
-        activationButton: 2,
+        activationButton: 3,
         sensitivity: 3,
         tolerance: 3,
       };
@@ -36,6 +43,8 @@ async function loadSettings() {
         option.selected = true;
         debugLog("Selected option", { value, text: option.text });
       }
+
+      updateRightClickWarning();
     }
 
     const sensitivitySelect = document.getElementById("sensitivity");
@@ -108,7 +117,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const toleranceSelect = document.getElementById("tolerance");
 
   if (select) {
-    select.addEventListener("change", saveSettings);
+    select.addEventListener("change", () => {
+      updateRightClickWarning();
+      saveSettings();
+    });
     debugLog("Added activationKey change event listener");
   }
 
@@ -121,4 +133,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     toleranceSelect.addEventListener("change", saveSettings);
     debugLog("Added tolerance change event listener");
   }
+
+  // Tab switching
+  const tabButtons = document.querySelectorAll(".tab-button");
+  const tabPanels = document.querySelectorAll(".tab-panel");
+  const footer = document.getElementById("popupFooter");
+  tabButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const tab = btn.dataset.tab;
+      tabButtons.forEach((b) => b.classList.toggle("active", b === btn));
+      tabPanels.forEach((p) =>
+        p.classList.toggle("active", p.id === `tab-${tab}`)
+      );
+
+      if (footer) {
+        // Hide footer on Tweaks tab, show on General
+        footer.style.display = tab === "tweaks" ? "none" : "block";
+      }
+    });
+  });
 });

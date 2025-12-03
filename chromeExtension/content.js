@@ -88,11 +88,25 @@ class MouseGestureRecognizer {
       const dy = currentPoint.y - lastPoint.y;
       const distanceSquared = dx * dx + dy * dy;
 
+      // Gesture intent threshold: if the mouse has moved more than a few pixels
+      // from the initial press point, we consider this a gesture in progress.
+      // This is separate from the main gesture recognition thresholds and helps
+      // us decide when to suppress the context menu for right-click drags.
+      if (!this.inGesture && this.pathPoints.length > 0) {
+        const start = this.pathPoints[0];
+        const intentDx = currentPoint.x - start.x;
+        const intentDy = currentPoint.y - start.y;
+        const intentDistanceSquared = intentDx * intentDx + intentDy * intentDy;
+        const intentThresholdSquared =
+          this.intentThreshold * this.intentThreshold;
+        if (intentDistanceSquared > intentThresholdSquared) {
+          this.inGesture = true;
+        }
+      }
+
       // Segment movement threshold in pixels, derived from sensitivity (1-5).
       // Higher sensitivity => smaller required movement between points.
-      const rawSensitivity = this.settings.sensitivity ?? 3;
-      const sensitivity = Math.max(1, Math.min(5, rawSensitivity));
-      const segmentThreshold = 6 + (5 - sensitivity) * 3; // pixels
+      const segmentThreshold = 6 + (5 - this.sensitivity) * 3; // pixels
       const segmentThresholdSquared = segmentThreshold * segmentThreshold;
 
       if (distanceSquared > segmentThresholdSquared) {
@@ -177,7 +191,9 @@ class MouseGestureRecognizer {
         hasGesture: MouseGestureRecognizer.GESTURES.hasOwnProperty(this.path),
       });
 
-    // Always prevent context menu if we just finished a gesture
+    // Prevent context menu only if we have a recognized gesture path.
+    // This makes it easier for the native context menu to appear when
+    // movement was small or did not form a valid gesture.
     if (this.path !== "") {
       e.preventDefault();
       if (this.settings.activationButton === 2 && this.isDrawing) {
@@ -235,15 +251,12 @@ class MouseGestureRecognizer {
     }
   }
 
-  preventDefault(e) {
-    e.preventDefault();
-  }
-
   constructor() {
     this.isDrawing = false;
     this.pathPoints = [];
     this.path = "";
     this.lastGesture = "";
+    this.inGesture = false;
     this.animationFrameId = null;
     this.canvas = this.createCanvas();
     this.ctx = this.canvas.getContext("2d", { alpha: true });
@@ -256,7 +269,6 @@ class MouseGestureRecognizer {
     this.handleContextMenu = this.handleContextMenu.bind(this);
     this.handleResize = this.handleResize.bind(this);
     this.handleSettingsChange = this.handleSettingsChange.bind(this);
-    this.preventDefault = this.preventDefault.bind(this);
     this.handleMessage = this.handleMessage.bind(this);
 
     // Initialize
@@ -330,7 +342,6 @@ class MouseGestureRecognizer {
     window.removeEventListener("mouseup", this.handleMouseUp);
     window.removeEventListener("mousemove", this.handleMouseMove);
     window.removeEventListener("contextmenu", this.handleContextMenu);
-    window.removeEventListener("contextmenu", this.preventDefault);
     window.removeEventListener("resize", this.handleResize);
   }
 
@@ -374,16 +385,21 @@ class MouseGestureRecognizer {
       gradient.addColorStop(1, "rgba(41, 128, 185, 0.8)");
     }
 
-    // Draw the main path with gradient and varying width
+    // Draw the main path with gradient and a smooth, continuous stroke.
+    // We keep a subtle flare towards the tip by adjusting lineWidth once
+    // based on the number of points, avoiding per-segment stroking which
+    // can look dotted.
     this.ctx.beginPath();
     this.ctx.strokeStyle = gradient;
 
-    // Use quadratic curves for smoother path
+    // Base width and a small flare factor based on path length.
+    const baseWidth = 3;
+    const flare = Math.min(3, this.pathPoints.length * 0.1);
+    this.ctx.lineWidth = baseWidth + flare;
+
+    // Use quadratic curves for a smooth continuous path
     this.ctx.moveTo(this.pathPoints[0].x, this.pathPoints[0].y);
     for (let i = 1; i < this.pathPoints.length - 1; i++) {
-      const progress = i / (this.pathPoints.length - 1);
-      this.ctx.lineWidth = 2 + progress * 4; // Line gets thicker towards the end
-
       const xc = (this.pathPoints[i].x + this.pathPoints[i + 1].x) / 2;
       const yc = (this.pathPoints[i].y + this.pathPoints[i + 1].y) / 2;
       this.ctx.quadraticCurveTo(
@@ -392,18 +408,15 @@ class MouseGestureRecognizer {
         xc,
         yc
       );
-      this.ctx.stroke();
-      this.ctx.beginPath();
-      this.ctx.moveTo(xc, yc);
     }
 
     // For the last point
     if (this.pathPoints.length > 1) {
       const last = this.pathPoints[this.pathPoints.length - 1];
-      this.ctx.lineWidth = 6; // Thickest at the end
       this.ctx.lineTo(last.x, last.y);
-      this.ctx.stroke();
     }
+
+    this.ctx.stroke();
   }
 
   processGesture(startPoint, endPoint) {
@@ -414,9 +427,8 @@ class MouseGestureRecognizer {
 
     // Minimum movement threshold to avoid tiny movements.
     // This is derived from tolerance (1-5): higher tolerance => needs more movement.
-    const rawTolerance = this.settings.tolerance ?? 3;
-    const tolerance = Math.max(1, Math.min(5, rawTolerance));
-    const minMovement = 10 + (tolerance - 3) * 3; // pixels
+    // Slightly lower base threshold so gestures start a bit earlier.
+    const minMovement = 8 + (this.tolerance - 3) * 2.5; // pixels
 
     if (Math.abs(dx) < minMovement && Math.abs(dy) < minMovement) {
       return; // Ignore very small movements
@@ -491,8 +503,8 @@ class MouseGestureRecognizer {
   cleanup() {
     if (DEBUG) console.log("[Debug] Cleanup");
     this.isDrawing = false;
+    this.inGesture = false;
     window.removeEventListener("mousemove", this.handleMouseMove);
-    window.removeEventListener("contextmenu", this.preventDefault);
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
     }
@@ -504,6 +516,21 @@ class MouseGestureRecognizer {
     this.detachEventListeners();
     chrome.storage.onChanged.removeListener(this.handleSettingsChange);
     this.canvas.remove();
+  }
+
+  get sensitivity() {
+    const raw = this.settings?.sensitivity ?? 3;
+    return Math.max(1, Math.min(5, raw));
+  }
+
+  get tolerance() {
+    const raw = this.settings?.tolerance ?? 3;
+    return Math.max(1, Math.min(5, raw));
+  }
+
+  get intentThreshold() {
+    // Lower intent threshold so right-drag is detected slightly sooner.
+    return 5; // pixels
   }
 }
 

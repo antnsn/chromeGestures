@@ -9,20 +9,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Zip Chrome Extension
-      run: |
-        zip -r chromeGestures.zip chromeExtension/
+      - name: Zip Chrome Extension
+        run: |
+          zip -r chromeGestures.zip chromeExtension/
 
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1.0.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: chromeGestures.zip
-        asset_name: chromeGestures.zip
-        asset_content_type: application/zip
-    
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: chromeGestures.zip
+          asset_name: chromeGestures.zip
+          asset_content_type: application/zip
